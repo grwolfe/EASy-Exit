@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace gui
 {
-    public partial class EASy_Exit : Form
+    public partial class EASy_EXIT : Form
     {
-        public EASy_Exit()
+        public EASy_EXIT()
         {
             InitializeComponent();
         }
