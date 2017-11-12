@@ -13,7 +13,7 @@ namespace gui
 {
     public partial class EASy_EXIT : Form
     {
-        public static readonly String[] BAUDRATES = { "9600", "115200" };
+        public static readonly string[] BAUDRATES = { "9600", "115200" };
         public EASy_EXIT()
         {
             InitializeComponent();
@@ -26,7 +26,7 @@ namespace gui
 
         private void setAvailablePorts()
         {
-            String[] ports = SerialPort.GetPortNames();
+            string[] ports = SerialPort.GetPortNames();
             portSelect.Items.AddRange(ports);
         }
 
@@ -44,12 +44,20 @@ namespace gui
 
         private void serialDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            Invoke(new EventHandler(EchoSerialData));
+            Invoke(new EventHandler(ReadSerialData));
         }
 
-        private void EchoSerialData(object sender, EventArgs e)
+        private void ReadSerialData(object sender, EventArgs e)
         {
-            debugTextBox.AppendText(serial.ReadExisting());
+            // packets are newline terminated
+            string data;
+            try {
+                data = serial.ReadLine() + '\n';
+            } catch (System.IO.IOException E) {
+                Console.WriteLine("{0} exception caught.", E);
+                data = "ERROR READING FROM SERIAL\n";
+            }
+            debugTextBox.AppendText(data);
         }
 
         private void checkPortSettings()
@@ -64,45 +72,37 @@ namespace gui
         }
 
         private void portSelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            checkPortSettings();
-        }
+        { checkPortSettings(); }
 
         private void baudSelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            checkPortSettings();
-        }
+        { checkPortSettings(); }
 
         private void scanButton_Click(object sender, EventArgs e)
-        {
-            setAvailablePorts();
-        }
+        { setAvailablePorts(); }
 
         private void connectButton_Click(object sender, EventArgs e)
         {
-            serial.PortName = portSelect.SelectedItem.ToString();
-            serial.BaudRate = Convert.ToInt32(baudSelect.SelectedItem);
-            serial.Open();
-            disconnectButton.Enabled = true;
-            transmitSerial.Enabled = true;
-            transmitDataText.Enabled = true;
-            connectButton.Enabled = false;
-            portSelect.Enabled = false;
-            baudSelect.Enabled = false;
-            scanButton.Enabled = false;
-            transmitDataText.Focus();
-        }
-
-        private void disconnectButton_Click(object sender, EventArgs e)
-        {
-            disconnectSerialDevice();
-            disconnectButton.Enabled = false;
-            transmitDataText.Enabled = false;
-            transmitSerial.Enabled = false;
-            connectButton.Enabled = true;
-            portSelect.Enabled = true;
-            baudSelect.Enabled = true;
-            scanButton.Enabled = true;
+            if (serial.IsOpen)
+            {
+                disconnectSerialDevice();
+                transmitDataText.Enabled = false;
+                transmitSerial.Enabled = false;
+                portSelect.Enabled = true;
+                baudSelect.Enabled = true;
+                scanButton.Enabled = true;
+                connectButton.Text = "Connect";
+            }
+            else
+            {
+                connectSerialDevice();
+                transmitSerial.Enabled = true;
+                transmitDataText.Enabled = true;
+                portSelect.Enabled = false;
+                baudSelect.Enabled = false;
+                scanButton.Enabled = false;
+                connectButton.Text = "Disconnect";
+                transmitDataText.Focus();
+            }
         }
 
         private void disconnectSerialDevice()
@@ -111,18 +111,27 @@ namespace gui
                 serial.Close();
         }
 
+        private void connectSerialDevice()
+        {
+            serial.PortName = portSelect.SelectedItem.ToString();
+            serial.BaudRate = Convert.ToInt32(baudSelect.SelectedItem);
+            serial.Open();
+        }
+
         private void transmitSerial_Click(object sender, EventArgs e)
         {
             if (serial.IsOpen)
             {
                 sendSerialData(transmitDataText.Text);
-                transmitDataText.Text = "";
+                transmitDataText.Clear();
             }
             transmitDataText.Focus();
         }
 
         private void sendSerialData(String data)
         {
+            // append newline character as end of packet
+            data += '\n';
             serial.Write(data);
         }
 
@@ -132,8 +141,15 @@ namespace gui
         }
 
         private void EAsy_EXIT_FormClosing(Object sender, FormClosedEventArgs e)
+        { disconnectSerialDevice(); }
+
+        private void transmitDataText_KeyDown(object sender, KeyEventArgs e)
         {
-            disconnectSerialDevice();
+            if (e.KeyValue == (int)Keys.Enter && serial.IsOpen)
+            {
+                sendSerialData(transmitDataText.Text);
+                transmitDataText.Clear();
+            }
         }
     }
 }

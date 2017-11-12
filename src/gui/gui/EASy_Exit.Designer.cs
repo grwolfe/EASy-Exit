@@ -36,7 +36,6 @@
             this.portSelectLabel = new System.Windows.Forms.TextBox();
             this.baudSelectLabel = new System.Windows.Forms.TextBox();
             this.connectButton = new System.Windows.Forms.Button();
-            this.disconnectButton = new System.Windows.Forms.Button();
             this.debugTextBox = new System.Windows.Forms.TextBox();
             this.transmitDataText = new System.Windows.Forms.TextBox();
             this.transmitSerial = new System.Windows.Forms.Button();
@@ -107,17 +106,6 @@
             this.connectButton.UseVisualStyleBackColor = true;
             this.connectButton.Click += new System.EventHandler(this.connectButton_Click);
             // 
-            // disconnectButton
-            // 
-            this.disconnectButton.Enabled = false;
-            this.disconnectButton.Location = new System.Drawing.Point(489, 26);
-            this.disconnectButton.Name = "disconnectButton";
-            this.disconnectButton.Size = new System.Drawing.Size(101, 48);
-            this.disconnectButton.TabIndex = 6;
-            this.disconnectButton.Text = "Disconnect";
-            this.disconnectButton.UseVisualStyleBackColor = true;
-            this.disconnectButton.Click += new System.EventHandler(this.disconnectButton_Click);
-            // 
             // debugTextBox
             // 
             this.debugTextBox.Location = new System.Drawing.Point(43, 145);
@@ -125,16 +113,19 @@
             this.debugTextBox.Name = "debugTextBox";
             this.debugTextBox.ReadOnly = true;
             this.debugTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.debugTextBox.Size = new System.Drawing.Size(545, 241);
+            this.debugTextBox.Size = new System.Drawing.Size(475, 241);
             this.debugTextBox.TabIndex = 7;
             this.debugTextBox.WordWrap = false;
             // 
             // transmitDataText
             // 
+            this.transmitDataText.AcceptsReturn = true;
             this.transmitDataText.Location = new System.Drawing.Point(43, 97);
+            this.transmitDataText.MaxLength = 256;
             this.transmitDataText.Name = "transmitDataText";
             this.transmitDataText.Size = new System.Drawing.Size(330, 22);
             this.transmitDataText.TabIndex = 8;
+            this.transmitDataText.KeyDown += new System.Windows.Forms.KeyEventHandler(this.transmitDataText_KeyDown);
             // 
             // transmitSerial
             // 
@@ -151,11 +142,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(651, 421);
+            this.ClientSize = new System.Drawing.Size(548, 421);
             this.Controls.Add(this.transmitSerial);
             this.Controls.Add(this.transmitDataText);
             this.Controls.Add(this.debugTextBox);
-            this.Controls.Add(this.disconnectButton);
             this.Controls.Add(this.connectButton);
             this.Controls.Add(this.baudSelectLabel);
             this.Controls.Add(this.portSelectLabel);
@@ -179,7 +169,6 @@
         private System.Windows.Forms.TextBox portSelectLabel;
         private System.Windows.Forms.TextBox baudSelectLabel;
         private System.Windows.Forms.Button connectButton;
-        private System.Windows.Forms.Button disconnectButton;
         private System.Windows.Forms.TextBox debugTextBox;
         private System.Windows.Forms.TextBox transmitDataText;
         private System.Windows.Forms.Button transmitSerial;
