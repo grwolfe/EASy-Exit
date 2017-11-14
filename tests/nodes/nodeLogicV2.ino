@@ -7,6 +7,7 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>           //header for tmp102
 
+#define MYID "n8"
 // Pin definitions:
 #define THRESHOLDTEMP 81
 #define BUFFERSIZE 200
@@ -22,32 +23,33 @@
  * #define GREEN3 
  */
 
-const String MYID = "n8";
 const byte rxPin = 2;
 const byte txPin = 3;
+SoftwareSerial xbeeSerial(rxPin, txPin); // RX(D2)(xbee out), TX(D3) (xbee in)
+
 const int REDLEDS[7];
 const int GRNLEDS[7];
 int ledIndex = 0;
-SoftwareSerial xbeeSerial(rxPin, txPin); // RX(D2)(xbee out), TX(D3) (xbee in)
 int tmp102Addr0 = 0x48;   //(add0=GND)
 int tmp102Addr1 = 0x49;   //(add1=VCC)
 float temp0 = 0;
 float temp1 = 0;
 int temp0Stat = -1;
 int temp1Stat = -1;
-char frameBuff[BUFFERSIZE+1]; //buffersize + '\n'
-String frameToSend;
+String frameTX;				//frame transmitted to hub
+String frameRX = "";		//frame received from hub
 String nodeID = "n?";
 int instruction = -1;
+
 
 void setup() {
 	Wire.begin();
 	pinMode(rxPin, INPUT);
 	pinMode(txPin, OUTPUT);
-	Serial.begin(115200);
+	Serial.begin(9600);
 	Serial.println("Starting up!");
 	// set the data rate for the SoftwareSerial port
-	xbeeSerial.begin(115200);
+	xbeeSerial.begin(9600);
 	//set pin mode
 	pinMode(RED, OUTPUT);
 	pinMode(GREEN, OUTPUT);
@@ -75,14 +77,14 @@ void setup() {
 }
 
 void loop() {
-	nodeID = "n?";
+	nodeID = "n?";		//reset nodeID
 	recMessage();
-	if (MYID == nodeID) {
+	if (String(MYID) == nodeID) {
 		switch (instruction) {
-			case 0:                 //update request => frameToSend<nodeid, temp0Status, temp0, temp1Status, temp1>
+			case 0:                 //update request => frameTX<nodeid, temp0Status, temp0, temp1Status, temp1>
 				getTemperature();
-				frameToSend = String(MYID) + ',' + String(temp0Stat) + ',' + String(temp0) + ',' + String(temp1Stat) + ',' + String(temp1) + '\n';
-				xbeeSerial.println(frameToSend);
+				frameTX = String(MYID) + ',' + String(temp0Stat) + ',' + String(temp0) + ',' + String(temp1Stat) + ',' + String(temp1) ;
+				xbeeSerial.println(frameTX);
 				break;
 
 			case 1:   //command
@@ -139,29 +141,26 @@ void loop() {
 	}
 }// end loop
 
-void recMessage() {		// RECIEVE LOGIC 
-	memset(frameBuff, 0, sizeof(frameBuff));
+void recMessage() {		// RECIEVE LOGIC  --> sets "nodeID" and "instruction"
 	int i = 0;
-	if (xbeeSerial.available() > 0) {
-		delay(2);
-		//while (xbeeSerial.available() > 0 && (xbeeSerial.peek() != '\n')) { 
-		while (xbeeSerial.peek() != '\n') { 
-			if ( xbeeSerial.available() )
-				frameBuff[i++] = xbeeSerial.read();
+	char c;
+	if ( xbeeSerial.available() ) {
+		while ( xbeeSerial.available() > 0 && (xbeeSerial.peek() != '\n' || xbeeSerial.peek() != '\r') ) { 
+			c = xbeeSerial.read();
+			frameRX += c;
 		}
-		xbeeSerial.read();		//flushing '\n' from RX buffer
-		frameBuff[i] = '\0';    //null terminate frame buffer string
-		String frameStr(frameBuff);
+		xbeeSerial.read();		//flushing '\n' OR '\r' from RX buffer
 	   
 		// get indexes of delimiters (i.e. commas) within frame
-		int delim0 = frameStr.indexOf(',');
-		//int delim1 = frameStr(frameBuff).indexOf(',', delim0 + 1);    
+		int delim0 = frameRX.indexOf(',');
+		//int delim1 = frameRX(frameBuff).indexOf(',', delim0 + 1);    
 		
-		// Parse message: frameStr="nodeid, instruction" -> instr. 0 = update request; 1 = command
-		nodeID = frameStr.substring(0, delim0);
-		instruction = frameStr.substring(delim0 + 1).toInt(); 
+		// Parse message: frameRX="nodeid, instruction" -> instr. 0 = update request; 1 = command
+		nodeID = frameRX.substring(0, delim0);
+		instruction = frameRX.substring(delim0 + 1).toInt(); 
 		Serial.print("nodeID: "); Serial.println(nodeID); Serial.print("instruction: "); Serial.println(instruction); 
-		Serial.print("Whole packet:"); Serial.print(frameStr);
+		Serial.print("Whole packet:"); Serial.println(frameRX);
+		frameRX = "";
 	}
 }// end recMessage()
 
