@@ -11,8 +11,8 @@ private:
     float
         temp[2];
 public:
-    node( const int address );
-    ~node();
+    Node( const int address );
+    ~Node();
     int getAddr() const;
     float getTemp( const int num ) const;
     int getStatus( const int num ) const;

@@ -1,11 +1,11 @@
 #include "Node.h"
 
-Node::node( const int address )
+Node::Node( const int address )
 {
     // constructor
 }
 
-Node::~node()
+Node::~Node()
 {
     // destructor
 }
