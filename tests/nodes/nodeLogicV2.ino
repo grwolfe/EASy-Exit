@@ -7,11 +7,10 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>           //header for tmp102
 
-#define MYID "n8"
 // Pin definitions:
 #define THRESHOLDTEMP 80
-#define MAXREDLEDS 2
-#define MAXGRNLEDS 2 
+#define MAXREDLEDS 3
+#define MAXGRNLEDS 3 
 
 #define RED0 4  
 #define GRN0 5
@@ -28,14 +27,16 @@
 #define RED6 16
 #define GRN6 17
 
+const String MYID = "n8";
+// TODO:  switch pin numbers for actual hub
 const byte rxPin = 2;
 const byte txPin = 3;
 SoftwareSerial xbeeSerial(rxPin, txPin);	// RX(D2)(xbee out), TX(D3) (xbee in)
 
 //const int REDLEDS[] = {RED0,RED1,RED2,RED3,RED4,RED5,RED6};
 //const int GRNLEDS[] = {GRN0,GRN1,GRN2,GRN3,GRN4,GRN5,GRN6};
-const int REDLEDS[] = {RED0, RED1};
-const int GRNLEDS[] = {GRN0, GRN1};
+const int REDLEDS[] = {RED0, RED1, RED2};
+const int GRNLEDS[] = {GRN0, GRN1, GRN2};
 int redIndex = 0;
 int grnIndex = 0;
 int tmp102Addr0 = 0x48;   // (add0=GND)
@@ -46,7 +47,7 @@ int temp0Stat = -1;
 int temp1Stat = -1;
 String frameTX = "";			// frame transmitted to hub
 String frameRX = "";		// frame received from hub
-String nodeID = "n?";
+String nodeID = "-1";
 int instruction = -1;
 
 
@@ -65,34 +66,44 @@ void setup() {
 		pinMode(GRNLEDS[grnIndex], OUTPUT);
 	}
 // initialize pins:
-	for (redIndex = 0; redIndex < MAXREDLEDS; redIndex++) {
-	   digitalWrite(REDLEDS[redIndex], LOW);
-	}
-	for (grnIndex = 0; grnIndex < MAXGRNLEDS; grnIndex++) {
-	   digitalWrite(GRNLEDS[grnIndex], LOW);
-	}
+	ledOFF();
 // scan for temp sensors at startup	
 	scanI2C();   
+	blinkINIT();
 }
 
 void loop() {
-	nodeID = "n?";		// reset nodeID
 	recMessage();
-	if (String(MYID) == nodeID) {
+	if (MYID == nodeID) {
 		switch (instruction) {
 			case 0:		// update request => frameTX<nodeid, temp0Status, temp0, temp1Status, temp1>
 				getTemperature();
 				frameTX = String(MYID) + ',' + String(temp0Stat) + ',' + String(temp0) + ',' + String(temp1Stat) + ',' + String(temp1) ;
 				xbeeSerial.println(frameTX);
 				break;
+			
+			case 1: 
+				Serial.println("Off command XD");
+				xbeeSerial.println("Turning off LEDs");
+				ledOFF();
+				delay(1000);
+				break;
 
-			case 1:   //command
-				Serial.println("Got a command :P");
-				//...
+			case 2:   //command
+				Serial.println("Got a blink command :P");
+				xbeeSerial.println("Blinking red LEDs");
+				blinkRED();
+				break;
+				
+			case 3:
+				Serial.println("Got a blink command :P");
+				xbeeSerial.println("Blinking green LEDs");
+				blinkGRN();
 				break;
 
 			default:
 				Serial.println("Nada");
+				blinkINIT();
 				break;
 		}
 	}
@@ -107,7 +118,7 @@ void loop() {
 				digitalWrite(GRNLEDS[grnIndex], LOW);
 			}
 			for (redIndex = 0; redIndex < MAXREDLEDS/2; redIndex++) {
-				onLed(REDLEDS[redIndex]);
+				digitalWrite(REDLEDS[redIndex], HIGH);
 			}
 		}
 		else if (temp0 < THRESHOLDTEMP) {
@@ -115,7 +126,7 @@ void loop() {
 				digitalWrite(REDLEDS[redIndex], LOW);
 			}
 			for (grnIndex = 0; grnIndex < MAXGRNLEDS/2; grnIndex++) {
-				onLed(GRNLEDS[grnIndex]);
+				digitalWrite(GRNLEDS[grnIndex], HIGH);
 			}
 		}
 // temp1 affects second half of LEDs		
@@ -124,7 +135,7 @@ void loop() {
 				digitalWrite(GRNLEDS[grnIndex], LOW);
 			}
 			for (; redIndex < MAXREDLEDS; redIndex++) {
-				onLed(REDLEDS[redIndex]);
+				digitalWrite(REDLEDS[redIndex], HIGH);
 			}
 		}
 		else if (temp1 < THRESHOLDTEMP) {
@@ -132,7 +143,7 @@ void loop() {
 				digitalWrite(REDLEDS[redIndex], LOW);
 			}
 			for (; grnIndex < MAXGRNLEDS; grnIndex++) {
-				onLed(GRNLEDS[grnIndex]);
+				digitalWrite(GRNLEDS[grnIndex], HIGH);
 			}
 		}
 		else {
@@ -149,7 +160,10 @@ void loop() {
 
 void recMessage() {		// RECIEVE LOGIC  --> sets "nodeID" and "instruction"
 	int i = 0;
+	nodeID = "-1";
+	instruction = -1;
 	char c;
+	
 	if ( xbeeSerial.available() ) {
 		while ( xbeeSerial.available() > 0 && (xbeeSerial.peek() != '\n' || xbeeSerial.peek() != '\r') ) { 
 			c = xbeeSerial.read();
@@ -165,7 +179,6 @@ void recMessage() {		// RECIEVE LOGIC  --> sets "nodeID" and "instruction"
 		nodeID = frameRX.substring(0, delim0);
 		instruction = frameRX.substring(delim0 + 1).toInt(); 
 		Serial.print("nodeID: "); Serial.println(nodeID); Serial.print("instruction: "); Serial.println(instruction); 
-		Serial.print("Whole packet:"); Serial.println(frameRX);
 		frameRX = "";
 	}
 }// end recMessage()
@@ -224,10 +237,54 @@ void getTemperature() {
 	temp1 = (1.8 * celsius) + 32;  //conver to farenheit
 }
 
-void onLed(int pin) {      // turn on led and wait
-    digitalWrite(pin, HIGH);
+void ledOFF() {		// turn off all leds  
+	for (redIndex = 0; redIndex < MAXREDLEDS; redIndex++) {
+	   digitalWrite(REDLEDS[redIndex], LOW);
+	}
+	for (grnIndex = 0; grnIndex < MAXGRNLEDS; grnIndex++) {
+	   digitalWrite(GRNLEDS[grnIndex], LOW);
+	}
 }
-void offLed(int pin) {      // turn on led and wait
-    digitalWrite(pin, LOW);
+void blinkRED() {      
+// turn off all leds
+	ledOFF();
+// turn on reds
+	for (redIndex = 0; redIndex < MAXREDLEDS; redIndex++) {
+		digitalWrite(REDLEDS[redIndex], HIGH);
+		delay(500);
+	}
+	for (redIndex = 0; redIndex < MAXREDLEDS; redIndex++) {
+		digitalWrite(REDLEDS[redIndex], LOW);
+		delay(500);
+	}
+}
+void blinkGRN() {    
+// turn off all leds  
+	ledOFF();
+// turn on greens
+	for (grnIndex = 0; grnIndex < MAXGRNLEDS; grnIndex++) {
+		digitalWrite(GRNLEDS[grnIndex], HIGH);
+		delay(500);
+	}
+	for (grnIndex = 0; grnIndex < MAXGRNLEDS; grnIndex++) {
+		digitalWrite(GRNLEDS[grnIndex], LOW);
+		delay(500);
+	}
+}
+void blinkINIT() {    
+	ledOFF();
+// turn on reds
+	for (redIndex = 0; redIndex < MAXREDLEDS; redIndex++) {
+		digitalWrite(REDLEDS[redIndex], HIGH);
+		delay(200);
+	}
+	ledOFF();
+// turn on greens
+	for (grnIndex = 0; grnIndex < MAXGRNLEDS; grnIndex++) {
+		digitalWrite(GRNLEDS[grnIndex], HIGH);
+		delay(200);
+	}
+	ledOFF();
+	delay(200);
 }
 
