@@ -7,8 +7,6 @@ int main()
     {
         // do stuff
     }
-
-    return 0; /* UNREACHABLE */
 }
 
 void init()
