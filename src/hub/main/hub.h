@@ -4,7 +4,7 @@
 #include "mbed.h"
 
 #define PC_BAUD     115200
-#define XB_BAUD     115200
+#define XB_BAUD     9600
 #define PC_BUFFSIZE 256
 #define XB_BUFFSIZE 200
 #define READY       true
