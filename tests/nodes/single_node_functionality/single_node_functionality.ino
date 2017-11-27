@@ -27,7 +27,7 @@
 #define RED6 16
 #define GRN6 17
 
-const String MYID = "n0";
+const String MYID = "n1";
 // TODO:  switch pin numbers for actual hub
 const byte rxPin = 3;
 const byte txPin = 2;

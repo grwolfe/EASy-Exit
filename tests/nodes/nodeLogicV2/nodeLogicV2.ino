@@ -165,7 +165,7 @@ void recMessage() {		// RECIEVE LOGIC  --> sets "nodeID" and "instruction"
 	char c;
 	
 	if ( xbeeSerial.available() ) {
-		while ( xbeeSerial.available() > 0 && (xbeeSerial.peek() != '\n' || xbeeSerial.peek() != '\r') ) { 
+		while ( xbeeSerial.available() > 0 && xbeeSerial.peek() != '\n' && xbeeSerial.peek() != '\r' ) { 
 			c = xbeeSerial.read();
 			frameRX += c;
 		}
