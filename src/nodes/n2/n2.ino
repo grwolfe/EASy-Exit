@@ -113,6 +113,36 @@ void loop() {
 						delay(250);
 					}
 					break;
+					
+				case 6:				// Vertical hall RED
+					xbeeSerial.println("1");
+					ledOFF();
+					delay(250);
+					vertHall('r');
+					break;
+					
+				case 7:				// Vertical hall GRN
+					xbeeSerial.println("1");
+					ledOFF();
+					delay(250);
+					vertHall('g');
+					break;
+					
+				case 8:				// Drill #1 (towards nearest exit)
+					xbeeSerial.println("1");
+					ledOFF();
+					delay(250);
+					digitalWrite(GRNLEDS[0], HIGH);
+					delay(250);
+					digitalWrite(GRNLEDS[1], HIGH);
+					digitalWrite(GRNLEDS[5], HIGH);
+					delay(250);
+					digitalWrite(GRNLEDS[2], HIGH);
+					digitalWrite(GRNLEDS[4], HIGH);
+					delay(250);
+					digitalWrite(GRNLEDS[3], HIGH);
+					delay(250);
+					break;
 
 				default:
 					xbeeSerial.println("0");
@@ -127,6 +157,7 @@ void loop() {
 	else {
 		getTemperature();
 	}
+	delay(200);
 }// end loop
 
 void recMessage() {   // RECIEVE LOGIC  --> sets "nodeID" and "instruction"
@@ -215,16 +246,35 @@ void blinkINIT() {
 		for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
 			digitalWrite(REDLEDS[ledIndex], HIGH);	
 		}
-		delay(100);
+		delay(150);
 		ledOFF();
-		delay(100);
+		delay(150);
 	}
 	// turn on greens
 	for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
 		digitalWrite(GRNLEDS[ledIndex], HIGH);
 	}
-	delay(150);
+	delay(200);
 	ledOFF();
+}
+
+void vertHall(char color) {
+	if (color == 'r') {
+		digitalWrite(REDLEDS[0], HIGH);	
+		delay(50);
+		digitalWrite(REDLEDS[1], HIGH);
+		delay(50);
+		digitalWrite(REDLEDS[2], HIGH);
+		delay(50);
+	}
+	if (color == 'g') {
+		digitalWrite(GRNLEDS[0], HIGH);	
+		delay(50);
+		digitalWrite(GRNLEDS[1], HIGH);
+		delay(50);
+		digitalWrite(GRNLEDS[2], HIGH);
+		delay(50);
+	}
 }
 
 void redBLINK() {      

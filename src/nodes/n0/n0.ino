@@ -90,7 +90,7 @@ void loop() {
 					xbeeSerial.println("1");
 					ledOFF();
 					delay(250);
-					for(ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
+					for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
 						digitalWrite(REDLEDS[ledIndex], HIGH);	
 						delay(250);
 					}
@@ -100,10 +100,41 @@ void loop() {
 					xbeeSerial.println("1");
 					ledOFF();
 					delay(250);
-					for(ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
+					for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
 						digitalWrite(GRNLEDS[ledIndex], HIGH);	
 						delay(250);
 					}
+					break;
+					
+				case 6:				// Vertical hall RED
+					xbeeSerial.println("1");
+					ledOFF();
+					delay(250);
+					vertHall('r');
+					break;
+					
+				case 7:				// Vertical hall GRN
+					xbeeSerial.println("1");
+					ledOFF();
+					delay(250);
+					vertHall('g');
+					break;
+					
+				case 8:				// Drill #1 (towards nearest exit)
+					xbeeSerial.println("1");
+					ledOFF();
+					delay(250);
+					digitalWrite(GRNLEDS[6], HIGH);
+					digitalWrite(GRNLEDS[3], HIGH);
+					delay(250);
+					digitalWrite(GRNLEDS[5], HIGH);
+					digitalWrite(GRNLEDS[2], HIGH);
+					delay(250);
+					digitalWrite(GRNLEDS[4], HIGH);	
+					digitalWrite(GRNLEDS[1], HIGH);
+					delay(250);
+					digitalWrite(GRNLEDS[0], HIGH);	
+					delay(250);
 					break;
 
 				default:
@@ -119,6 +150,7 @@ void loop() {
 	else {
 		getTemperature();
 	}
+	delay(200);
 }// end loop
 
 void recMessage() {   // RECIEVE LOGIC  --> sets "nodeID" and "instruction"
@@ -207,16 +239,31 @@ void blinkINIT() {
 		for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
 			digitalWrite(REDLEDS[ledIndex], HIGH);	
 		}
-		delay(100);
+		delay(150);
 		ledOFF();
-		delay(100);
+		delay(150);
 	}
 	// turn on greens
 	for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
 		digitalWrite(GRNLEDS[ledIndex], HIGH);
 	}
-	delay(150);
+	delay(200);
 	ledOFF();
+}
+
+void vertHall(char color) {
+	if (color == 'r') {
+		for(ledIndex = 6; ledIndex > 3; ledIndex--) {
+			digitalWrite(REDLEDS[ledIndex], HIGH);	
+			delay(50);
+		}
+	}
+	if (color == 'g') {
+		for(ledIndex = 6; ledIndex > 3; ledIndex--) {
+			digitalWrite(GRNLEDS[ledIndex], HIGH);	
+			delay(50);
+		}
+	}
 }
 
 void redBLINK() {      
