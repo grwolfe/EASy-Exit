@@ -4,10 +4,7 @@
 #include "mbed.h"
 #include <stdlib.h>
 
-//TODO: make these defines into an enum
-#define OFF 1
-#define RED 2
-#define GRN 3
+#define THRESHOLD 80.0
 
 class Node
 {
@@ -20,12 +17,12 @@ private:
         temp[2];
 public:
     Node( const int address );
-    ~Node();
     int getAddr() const;
     float getTemp( const int num ) const;
     int getStatus( const int num ) const;
     int getPattern() const;
-    void setTemp( Serial *xbee );
+    int emergency() const;
+    int setTemp( Serial *xbee );
     void setStatus( const int num, const int status );
     void setPattern( const int pattern );
     void command( Serial *xbee, const int c );

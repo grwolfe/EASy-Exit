@@ -8,19 +8,21 @@
 #define PC_BAUD     9600
 #define XB_BAUD     9600
 #define PC_BUFFSIZE 256
-#define XB_BUFFSIZE 200
 #define READY       true
 #define NOT_READY   false
-#define PC_UPRATE   1
+
+//TODO: make these defines into an enum
+#define OFF 1
+#define RED 2
+#define GRN 3
 
 bool emergency = false;
 
 /* SERIAL COMMUNICATIONS BUFFER & FLAG */
 char pc_buff[PC_BUFFSIZE];
-volatile bool pc_msg = NOT_READY;
+volatile bool pc_rdy = NOT_READY;
 
 /* MBED OBJECT DEFINITIONS */
-Ticker timer;
 Serial pc( USBTX, USBRX, PC_BAUD ); // connection to PC / GUI
 Serial xbee( p13, p14, XB_BAUD );   // connection to XBee / Nodes
 
@@ -37,9 +39,11 @@ Node nodes[] =
 
 /* FUNCTION DEFINITIONS */
 void PC_RX_ISR();
-void XB_RX_ISR();
 void init();
 void reset();
+void command_all( const int c );
+void process_command();
+void quit();
 void update_gui();
 
 #endif /* HUB_H */

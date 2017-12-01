@@ -2,12 +2,9 @@
 
 Node::Node( const int address ): addr(address)
 {
-    this->pattern = OFF;
-}
-
-Node::~Node()
-{
-    // destructor
+    this->pattern = 1;
+    this->stats[0] = -1;
+    this->stats[1] = -1;
 }
 
 int Node::getAddr() const
@@ -22,6 +19,18 @@ int Node::getStatus( const int num ) const
 int Node::getPattern() const
 { return this->pattern; }
 
+int Node::emergency() const
+{
+    if( this->temp[0] > THRESHOLD && this->temp[1] > THRESHOLD )
+        return 2;
+    else if( this->temp[0] > THRESHOLD )
+        return 1;   // horizontal hallway triggered
+    else if( this->temp[1] > THRESHOLD )
+        return -1;  // veritcal hallway triggered
+    else
+        return 0;   // none triggered
+}
+
 void Node::command( Serial *xbee, const int c )
 {
     // if trying to send a 0 then perform update request
@@ -34,7 +43,7 @@ void Node::command( Serial *xbee, const int c )
     }
 }
 
-void Node::setTemp( Serial *xbee )
+int Node::setTemp( Serial *xbee )
 {
     // declare and initialize variables
     int i = 0;
@@ -61,12 +70,14 @@ void Node::setTemp( Serial *xbee )
     if( strcmp( s_addr, strtok(buffer, ",") ) != 0 )
     {
         // error not the correct node responded
+        return 1;
     } else {
-        this->stats[0] = atoi( strtok( NULL, "," ) );
-        this->temp[0]  = atof( strtok( NULL, ",") );
+        this->stats[0] = atoi( strtok( NULL, "," ));
+        this->temp[0]  = atof( strtok( NULL, "," ));
 
-        this->stats[1] = atoi( strtok( NULL, "," ) );
-        this->temp[1]  = atof( strtok( NULL, "," ) );        
+        this->stats[1] = atoi( strtok( NULL, "," ));
+        this->temp[1]  = atof( strtok( NULL, "," ));
+        return 0;
     }
 }
 

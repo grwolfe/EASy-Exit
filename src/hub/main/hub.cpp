@@ -3,69 +3,88 @@
 int main()
 {
     init();
-    nodes[0].setTemp( &xbee );
-    nodes[0].command( &xbee, 2);
+    
+    pc.printf("Sending RED command to all nodes...\r\n");
+    command_all( RED );
+    wait(1);
+    
+    pc.printf("Sending GRN command to all nodes...\r\n");
+    command_all( GRN );
+    wait(1);
+    
+    pc.printf("Sending OFF command to all nodes...\r\n");
+    command_all( OFF );
+    wait(1);
+    
     while(1)
     {
-        pc.printf("N%d\r\nT0Status: %d\tTemp: %f\r\nT1Status: %d\tTemp: %f\r\n", 
-            nodes[0].getAddr(), 
-            nodes[0].getStatus(0), nodes[0].getTemp(0),
-            nodes[0].getStatus(1), nodes[0].getTemp(1));
-        wait(2);
+        if( pc_rdy == READY )
+            process_command();
     }
-    // while (1)
-    // {
-    //     while( emergency )
-    //     {
-    //         // tell all nodes to get it
-    //         pc.printf("Emergency!\r\n");
-    //         for( int i = 0; i < 6; i++ )
-    //         {
-    //             if( nodes[i].getTemp(0) > 80 || nodes[i].getTemp(1) > 80 )
-    //             {
-    //                 xbee.printf("n%d,2\n", nodes[i].getAddr());
-    //             } else {
-    //                 xbee.printf("n%d,3\n", nodes[i].getAddr());
-    //             }
-    //         }
-    //         wait(2);
-    //     }
-    //     // get updates from Nodes
-    //     for( int i = 0; i < NUM_NODES; i++ )
-    //     {
-    //         xbee.printf("n%d,0\n", nodes[i].getAddr());
-    //         while( xb_msg == NOT_READY );   //wait for reply
-    //         pc.printf("%s\r\n", xb_buff);
-            
-    //         char *token = strtok( xb_buff, "," );
-    //         token = strtok( NULL, "," );    // t0 status
-    //         token = strtok( NULL, "," );    // t0
-    //         float temp0 = atof(token);   // convert t0 to float                
-    //         token = strtok(NULL, ",");  // t1 status
-    //         token = strtok( NULL, "," );    // t1
-    //         float temp1 = atof(token);
-
-    //         nodes[i].setTemp(0, temp0);
-    //         nodes[i].setTemp(1, temp1);
-
-    //         if( temp0 > 80 || temp1 > 80 )
-    //             emergency = true;
-            
-    //         memset( xb_buff, 0, sizeof(xb_buff) );
-    //         wait(2);
-    //     }
-    //     wait(1);
-    // }
 }
 
 void init()
 {
-    pc.printf("%s\r\n", "Initializing system...");
+    pc.printf("Initializing system...\r\n");
     memset( pc_buff, 0, sizeof(pc_buff) );
-    // memset( xb_buff, 0, sizeof(xb_buff) );
-    // xbee.attach( &XB_RX_ISR );
     pc.attach( &PC_RX_ISR );
-    // timer.attach( &update_gui, PC_UPRATE );
+}
+
+void command_all( const int c )
+{
+    for( int i = 0; i < NUM_NODES; i++ )
+        nodes[i].command( &xbee, c );
+}
+
+void process_command()
+{
+    if( strcmp( pc_buff, "update") == 0 )
+        update_gui();
+    else if( strcmp( pc_buff, "quit" ) == 0 )
+        quit();
+    else if( strcmp( pc_buff, "reset" ) == 0 )
+        reset();
+    else
+        pc.printf("Echo: %s\r\n", pc_buff);
+
+    pc_rdy = NOT_READY;
+    memset( pc_buff, 0, sizeof(pc_buff) );
+}
+
+void quit()
+{
+    pc.printf("Termination command: \"%s\" received.\r\nShutting down...\r\n", pc_buff);
+    memset( pc_buff, 0, sizeof(pc_buff) );
+    while(true)
+    {
+        if( pc_rdy )
+        {
+            if( strcmp(pc_buff, "reset") == 0 )
+                reset();
+            pc_rdy = NOT_READY;
+            memset( pc_buff, 0, sizeof(pc_buff) );
+        }
+        wait(0.5);
+    }
+}
+
+void reset()
+{
+    pc.printf( "\r\nResetting system...\r\n" );
+    wait(0.5);
+    NVIC_SystemReset();
+}
+
+void update_gui()
+{
+    for( int i = 0; i < NUM_NODES; i++ )
+    {
+        printf("Node %d:\r\nT0 - %d: %.2f\r\nT1 - %d: %.2f\r\n", i,
+            nodes[i].getStatus(0), nodes[i].getTemp(0),
+            nodes[i].getStatus(1), nodes[i].getTemp(1)
+        );
+        pc.printf("\r\n");
+    }
 }
 
 void PC_RX_ISR()
@@ -77,31 +96,6 @@ void PC_RX_ISR()
         byte = pc.getc();
         pc_buff[i++] = byte;
     } while( byte != '\n' && i < PC_BUFFSIZE );
-    pc_msg = READY;
-}
-
-// void XB_RX_ISR()
-// {
-//     int i = 0;
-//     char byte;
-//     do
-//     {
-//         byte = xbee.getc();
-//         xb_buff[i++] = byte;
-//     } while( byte != '\n' && i < XB_BUFFSIZE );
-//     xb_msg = READY;
-// }
-
-void update_gui()
-{
-    // send an update to the PC
-    for( int i = 0; i < NUM_NODES; i++ )
-        pc.printf( "N%d: %f %f\r\n",
-            i, nodes[i].getTemp(0), nodes[i].getTemp(1) );
-}
-
-void reset()
-{
-    pc.printf( "Resetting system...\n" );
-    NVIC_SystemReset();
+    pc_buff[i - 1] = '\0'; // replace newline character with NULL terminator
+    pc_rdy = READY;
 }
