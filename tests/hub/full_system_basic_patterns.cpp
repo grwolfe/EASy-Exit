@@ -25,15 +25,10 @@ void init()
     memset( pc_buff, 0, sizeof(pc_buff) );
     pc.attach( &PC_RX_ISR );
     
-    pc.printf("Sending RED command to all nodes...\r\n");
     command_all( RED );
     wait(1);
-    
-    pc.printf("Sending GRN command to all nodes...\r\n");
     command_all( GRN );
     wait(1);
-    
-    pc.printf("Sending OFF command to all nodes...\r\n");
     command_all( OFF );
     wait(1);
 }
@@ -46,42 +41,11 @@ void command_all( const int c )
 
 void emergency( int source )
 {
-    nodes[source].command( &xbee, RED );
     pc.printf("Emergency detected at node %d!!\r\n", source);
-    switch( source )
-    {
-        case 0:
-            if( nodes[1].emergency() )
-                nodes[1].command( &xbee, RIGHT );
-            else
-                nodes[1].command( &xbee, RED );
 
-            if( nodes[2].emergency() )
-                nodes[2].command( &xbee, RED );
-            else
-                nodes[2].command( &xbee, DOWN );
+    command_all( GRN );
+    nodes[source].command( &xbee, RED );
 
-            if( nodes[3].emergency() )
-                nodes[3].command( &xbee, RED );
-            else
-                nodes[3].command( &xbee, LEFT );
-
-            if( nodes[4].emergency() )
-                nodes[4].command( &xbee, RED );
-            else
-                nodes[4].command( &xbee, DOWN );
-
-            if( nodes[5].emergency() )
-                nodes[5].command( &xbee, RED );
-            else
-                nodes[5].command( &xbee, RIGHT );
-            break;
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-    }
     // remain in state of emergency until reset
     while( true )
     {
@@ -103,14 +67,37 @@ void drill()
     while( true )
     {
         for( int i = 1; i < NUM_NODES; i++ )
+        {
             nodes[i].command( &xbee, DRILL );
-        
+            wait(0.3);
+        }
         wait(0.5);
 
         for( int i = 1; i < NUM_NODES; i++ )
+        {
             nodes[i].command( &xbee, OFF );
+            wait(0.3);
+        }
+        wait(1.5);
+    }
+}
 
-        wait(0.5);
+void slow_drill()
+{
+    pc.printf("Executing a drill...\r\n");
+    nodes[0].command( &xbee, RED );
+    while( true )
+    {
+        for( int i = 1; i < NUM_NODES; i++ )
+        {
+            nodes[i].command( &xbee, DRILL );
+            wait(1.5);
+        }
+        for( int i = 1; i < NUM_NODES; i++ )
+        {
+            nodes[i].command( &xbee, OFF );
+        }
+        wait(2);
     }
 }
 

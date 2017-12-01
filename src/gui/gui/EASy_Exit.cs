@@ -42,6 +42,11 @@ namespace gui
             baudSelect.SelectedIndex = 0;
         }
 
+        private void clear_textbox()
+        {
+            debugTextBox.Clear();
+        }
+
         private void serialDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             Invoke(new EventHandler(ReadSerialData));
@@ -150,6 +155,11 @@ namespace gui
                 sendSerialData(transmitDataText.Text);
                 transmitDataText.Clear();
             }
+        }
+
+        private void clear_button_Click(object sender, EventArgs e)
+        {
+            clear_textbox();
         }
     }
 }
