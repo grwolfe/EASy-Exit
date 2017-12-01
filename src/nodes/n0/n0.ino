@@ -26,7 +26,6 @@
 #define GRN6 17
 
 const String MYID = "n0";
-// TODO:  switch pin numbers for actual hub
 const byte rxPin = 3;
 const byte txPin = 2;
 SoftwareSerial xbeeSerial(rxPin, txPin);  // RX(D2)(xbee out), TX(D3) (xbee in)
@@ -72,22 +71,18 @@ void loop() {
 			pattern = instruction;
 			switch (pattern) {
 				case 1:					// all OFF
-					xbeeSerial.println("1");
 					ledOFF();
 					break;
 
 				case 2:   				// Red ON
-					xbeeSerial.println("1");
 					redON();
 					break;
 
 				case 3:					// Grn ON
-					xbeeSerial.println("1");
 					grnON();
 					break;
 					
 				case 4:					// Undulate red
-					xbeeSerial.println("1");
 					ledOFF();
 					delay(250);
 					for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
@@ -97,7 +92,6 @@ void loop() {
 					break;
 					
 				case 5:					// Undulate green
-					xbeeSerial.println("1");
 					ledOFF();
 					delay(250);
 					for (ledIndex = 0; ledIndex < MAXLEDS; ledIndex++) {
@@ -107,21 +101,18 @@ void loop() {
 					break;
 					
 				case 6:				// Vertical hall RED
-					xbeeSerial.println("1");
 					ledOFF();
 					delay(250);
 					vertHall('r');
 					break;
 					
 				case 7:				// Vertical hall GRN
-					xbeeSerial.println("1");
 					ledOFF();
 					delay(250);
 					vertHall('g');
 					break;
 					
 				case 8:				// Drill #1 (towards nearest exit)
-					xbeeSerial.println("1");
 					ledOFF();
 					delay(250);
 					digitalWrite(GRNLEDS[6], HIGH);
@@ -138,12 +129,11 @@ void loop() {
 					break;
 
 				default:
-					xbeeSerial.println("0");
 					break;
 			}
 		}
 		else {
-			frameTX = String(MYID) + ',' + String(temp0Stat) + ',' + String(temp0) + ',' + String(temp1Stat) + ',' + String(temp1) ;
+			frameTX = String(MYID) + ',' + String(temp0Stat) + ',' + String(temp0) + ',' + String(temp1Stat) + ',' + String(temp1);
 			xbeeSerial.println(frameTX);
 		}
 	}
