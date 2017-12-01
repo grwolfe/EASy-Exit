@@ -39,7 +39,7 @@ namespace gui
         {
             if (portSelect.Items.Count > 0)
                 portSelect.SelectedIndex = 0;
-            baudSelect.SelectedIndex = 1;
+            baudSelect.SelectedIndex = 0;
         }
 
         private void serialDataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -52,7 +52,7 @@ namespace gui
             // packets are newline terminated
             string data;
             try {
-                data = serial.ReadLine() + '\n';
+                data = serial.ReadExisting();
             } catch (System.IO.IOException E) {
                 Console.WriteLine("{0} exception caught.", E);
                 data = "ERROR READING FROM SERIAL\n";
