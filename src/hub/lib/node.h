@@ -23,9 +23,9 @@ public:
     int getPattern() const;
     int emergency() const;
     int setTemp( Serial *xbee );
+    int command( Serial *xbee, const int c );
     void setStatus( const int num, const int status );
     void setPattern( const int pattern );
-    void command( Serial *xbee, const int c );
 };
 
 #endif /* NODE_H */

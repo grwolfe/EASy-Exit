@@ -12,11 +12,10 @@
 #define NOT_READY   false
 
 //TODO: make these defines into an enum
+#define UPDATE 0
 #define OFF 1
 #define RED 2
 #define GRN 3
-
-bool emergency = false;
 
 /* SERIAL COMMUNICATIONS BUFFER & FLAG */
 char pc_buff[PC_BUFFSIZE];
@@ -45,5 +44,7 @@ void command_all( const int c );
 void process_command();
 void quit();
 void update_gui();
+void update_temps();
+void emergency( int source );
 
 #endif /* HUB_H */

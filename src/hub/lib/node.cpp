@@ -31,15 +31,16 @@ int Node::emergency() const
         return 0;   // none triggered
 }
 
-void Node::command( Serial *xbee, const int c )
+int Node::command( Serial *xbee, const int c )
 {
     // if trying to send a 0 then perform update request
     if( c == 0 )
-        setTemp( xbee );
+        return setTemp( xbee );
     else
     {
         xbee->printf("n%d,%d\n", this->addr, c); // send the command to the node
         this->pattern = c;                      // update the pattern for this node object
+        return 0;
     }
 }
 
@@ -63,15 +64,14 @@ int Node::setTemp( Serial *xbee )
         }
     }
     while( byte != '\n' && byte != '\r' && i < 25 );
+    xbee->getc();   // flush the newline
 
     // parse the response and update class fields
     // RESPONSE: <NODE_ADDR>,<T0Status>,<T0>,<T1Status>,<T1>\n
     sprintf( s_addr, "n%d", this->addr );
     if( strcmp( s_addr, strtok(buffer, ",") ) != 0 )
-    {
-        // error not the correct node responded
-        return 1;
-    } else {
+        return 1;   // error not the correct node responded
+    else {
         this->stats[0] = atoi( strtok( NULL, "," ));
         this->temp[0]  = atof( strtok( NULL, "," ));
 

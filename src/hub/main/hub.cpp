@@ -2,7 +2,28 @@
 
 int main()
 {
-    init();
+    init();    
+    while( true )
+    {
+        if( pc_rdy == READY )
+            process_command();
+        
+        for( int i = 0; i < NUM_NODES; i++ )
+        {
+            nodes[i].setTemp( &xbee );
+            if( nodes[i].emergency() )
+                emergency(i);
+        }
+
+        update_gui();
+    }
+}
+
+void init()
+{
+    pc.printf("Initializing system...\r\n");
+    memset( pc_buff, 0, sizeof(pc_buff) );
+    pc.attach( &PC_RX_ISR );
     
     pc.printf("Sending RED command to all nodes...\r\n");
     command_all( RED );
@@ -15,25 +36,26 @@ int main()
     pc.printf("Sending OFF command to all nodes...\r\n");
     command_all( OFF );
     wait(1);
-    
-    while(1)
-    {
-        if( pc_rdy == READY )
-            process_command();
-    }
-}
-
-void init()
-{
-    pc.printf("Initializing system...\r\n");
-    memset( pc_buff, 0, sizeof(pc_buff) );
-    pc.attach( &PC_RX_ISR );
 }
 
 void command_all( const int c )
 {
     for( int i = 0; i < NUM_NODES; i++ )
         nodes[i].command( &xbee, c );
+}
+
+void emergency( int source )
+{
+    pc.printf("Emergency detected at node %d!!\r\n", source);
+
+    command_all( GRN );
+    nodes[source].command( &xbee, RED );
+
+    // remain in state of emergency until reset
+    while( true )
+    {
+        wait(0.5);
+    }
 }
 
 void process_command()
@@ -55,17 +77,7 @@ void quit()
 {
     pc.printf("Termination command: \"%s\" received.\r\nShutting down...\r\n", pc_buff);
     memset( pc_buff, 0, sizeof(pc_buff) );
-    while(true)
-    {
-        if( pc_rdy )
-        {
-            if( strcmp(pc_buff, "reset") == 0 )
-                reset();
-            pc_rdy = NOT_READY;
-            memset( pc_buff, 0, sizeof(pc_buff) );
-        }
-        wait(0.5);
-    }
+    while( true );
 }
 
 void reset()
@@ -98,4 +110,7 @@ void PC_RX_ISR()
     } while( byte != '\n' && i < PC_BUFFSIZE );
     pc_buff[i - 1] = '\0'; // replace newline character with NULL terminator
     pc_rdy = READY;
+    
+    if( strcmp(pc_buff, "reset") == 0 )
+        reset();
 }
