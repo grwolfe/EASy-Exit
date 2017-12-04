@@ -16,6 +16,11 @@
 #define OFF 1
 #define RED 2
 #define GRN 3
+#define LEFT 4
+#define RIGHT 5
+#define DOWN 6
+#define UP 7
+#define DRILL 8
 
 /* SERIAL COMMUNICATIONS BUFFER & FLAG */
 char pc_buff[PC_BUFFSIZE];
@@ -46,5 +51,7 @@ void quit();
 void update_gui();
 void update_temps();
 void emergency( int source );
+void drill();
+void slow_drill();
 
 #endif /* HUB_H */

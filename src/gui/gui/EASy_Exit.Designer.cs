@@ -39,6 +39,7 @@
             this.debugTextBox = new System.Windows.Forms.TextBox();
             this.transmitDataText = new System.Windows.Forms.TextBox();
             this.transmitSerial = new System.Windows.Forms.Button();
+            this.clear_button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // serial
@@ -113,7 +114,7 @@
             this.debugTextBox.Name = "debugTextBox";
             this.debugTextBox.ReadOnly = true;
             this.debugTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.debugTextBox.Size = new System.Drawing.Size(475, 241);
+            this.debugTextBox.Size = new System.Drawing.Size(475, 475);
             this.debugTextBox.TabIndex = 7;
             this.debugTextBox.WordWrap = false;
             // 
@@ -123,14 +124,14 @@
             this.transmitDataText.Location = new System.Drawing.Point(43, 97);
             this.transmitDataText.MaxLength = 256;
             this.transmitDataText.Name = "transmitDataText";
-            this.transmitDataText.Size = new System.Drawing.Size(330, 22);
+            this.transmitDataText.Size = new System.Drawing.Size(275, 22);
             this.transmitDataText.TabIndex = 8;
             this.transmitDataText.KeyDown += new System.Windows.Forms.KeyEventHandler(this.transmitDataText_KeyDown);
             // 
             // transmitSerial
             // 
             this.transmitSerial.Enabled = false;
-            this.transmitSerial.Location = new System.Drawing.Point(381, 90);
+            this.transmitSerial.Location = new System.Drawing.Point(324, 90);
             this.transmitSerial.Name = "transmitSerial";
             this.transmitSerial.Size = new System.Drawing.Size(96, 37);
             this.transmitSerial.TabIndex = 9;
@@ -138,11 +139,22 @@
             this.transmitSerial.UseVisualStyleBackColor = true;
             this.transmitSerial.Click += new System.EventHandler(this.transmitSerial_Click);
             // 
+            // clear_button
+            // 
+            this.clear_button.Location = new System.Drawing.Point(426, 90);
+            this.clear_button.Name = "clear_button";
+            this.clear_button.Size = new System.Drawing.Size(92, 37);
+            this.clear_button.TabIndex = 10;
+            this.clear_button.Text = "Clear";
+            this.clear_button.UseVisualStyleBackColor = true;
+            this.clear_button.Click += new System.EventHandler(this.clear_button_Click);
+            // 
             // EASy_EXIT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(548, 421);
+            this.ClientSize = new System.Drawing.Size(548, 646);
+            this.Controls.Add(this.clear_button);
             this.Controls.Add(this.transmitSerial);
             this.Controls.Add(this.transmitDataText);
             this.Controls.Add(this.debugTextBox);
@@ -172,6 +184,7 @@
         private System.Windows.Forms.TextBox debugTextBox;
         private System.Windows.Forms.TextBox transmitDataText;
         private System.Windows.Forms.Button transmitSerial;
+        private System.Windows.Forms.Button clear_button;
     }
 }
 
