@@ -120,20 +120,65 @@ void loop() {
 					vertHall('g');
 					break;
 					
-				case 8:				// Drill #1 (towards nearest exit)
+				case 8:					// UP
 					ledOFF();
 					delay(250);
+					for(ledIndex = 0; ledIndex < 6; ledIndex++) {
+						digitalWrite(GRNLEDS[ledIndex], HIGH);	
+						delay(250);
+					}
+					break;
+					
+				case 12:	
+				case 9:				// DWON
+					ledOFF();
+					delay(250);
+					ledOFF();
+					delay(250);
+					for(ledIndex = 5; ledIndex >= 0; ledIndex--) {
+						digitalWrite(GRNLEDS[ledIndex], HIGH);	
+						delay(250);
+					}
+					break;
+					
+				case 10:				// LFET
+					ledOFF();
+					delay(250);
+					digitalWrite(GRNLEDS[5], HIGH);
 					digitalWrite(GRNLEDS[0], HIGH);
 					delay(250);
-					digitalWrite(GRNLEDS[1], HIGH);
-					digitalWrite(GRNLEDS[5], HIGH);
-					delay(250);
-					digitalWrite(GRNLEDS[2], HIGH);
 					digitalWrite(GRNLEDS[4], HIGH);
+					digitalWrite(GRNLEDS[1], HIGH);
+					delay(250);
+					digitalWrite(GRNLEDS[2], HIGH);	
 					delay(250);
 					digitalWrite(GRNLEDS[3], HIGH);
 					delay(250);
 					break;
+					
+				case 11:				// RIHGT
+					ledOFF();
+					delay(250);
+					for(ledIndex = 0; ledIndex < 6; ledIndex++) {
+						digitalWrite(GRNLEDS[ledIndex], HIGH);	
+						delay(250);
+					}
+					break;
+					
+				// case 12:				// Drill #1 (towards nearest exit)
+					// ledOFF();
+					// delay(250);
+					// digitalWrite(GRNLEDS[0], HIGH);
+					// delay(250);
+					// digitalWrite(GRNLEDS[1], HIGH);
+					// digitalWrite(GRNLEDS[5], HIGH);
+					// delay(250);
+					// digitalWrite(GRNLEDS[2], HIGH);
+					// digitalWrite(GRNLEDS[4], HIGH);
+					// delay(250);
+					// digitalWrite(GRNLEDS[3], HIGH);
+					// delay(250);
+					// break;
 
 				default:
 					break;
