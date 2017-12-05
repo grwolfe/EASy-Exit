@@ -12,15 +12,15 @@
 #define NOT_READY   false
 
 //TODO: make these defines into an enum
-#define UPDATE 0
-#define OFF 1
-#define RED 2
-#define GRN 3
-#define LEFT 4
-#define RIGHT 5
-#define DOWN 6
-#define UP 7
-#define DRILL 8
+#define UPDATE  0
+#define OFF     1
+#define RED     2
+#define GRN     3
+#define UP      8
+#define DOWN    9
+#define LEFT    10
+#define RIGHT   11
+#define DRILL   12
 
 /* SERIAL COMMUNICATIONS BUFFER & FLAG */
 char pc_buff[PC_BUFFSIZE];
@@ -40,6 +40,7 @@ Node nodes[] =
     Node(4),
     Node(5)
 };
+bool emergencies[NUM_NODES];
 
 /* FUNCTION DEFINITIONS */
 void PC_RX_ISR();
@@ -52,6 +53,6 @@ void update_gui();
 void update_temps();
 void emergency( int source );
 void drill();
-void slow_drill();
+void basic_drill();
 
 #endif /* HUB_H */
