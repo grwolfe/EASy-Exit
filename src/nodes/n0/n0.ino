@@ -199,7 +199,6 @@ void loop() {
 					delay(250);
 					break;
 
-
 				default:
 					break;
 			}
@@ -212,7 +211,7 @@ void loop() {
 	else {
 		getTemperature();
 	}
-	delay(200);
+	delay(50);
 }// end loop
 
 void recMessage() {   // RECIEVE LOGIC  --> sets "nodeID" and "instruction"

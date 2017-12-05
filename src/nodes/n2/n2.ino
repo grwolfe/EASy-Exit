@@ -128,8 +128,7 @@ void loop() {
 						delay(250);
 					}
 					break;
-					
-				case 12:	
+						
 				case 9:				// DWON
 					ledOFF();
 					delay(250);
@@ -155,7 +154,8 @@ void loop() {
 					digitalWrite(GRNLEDS[3], HIGH);
 					delay(250);
 					break;
-					
+				
+				case 12:				// Drill #1
 				case 11:				// RIHGT
 					ledOFF();
 					delay(250);
@@ -164,21 +164,6 @@ void loop() {
 						delay(250);
 					}
 					break;
-					
-				// case 12:				// Drill #1 (towards nearest exit)
-					// ledOFF();
-					// delay(250);
-					// digitalWrite(GRNLEDS[0], HIGH);
-					// delay(250);
-					// digitalWrite(GRNLEDS[1], HIGH);
-					// digitalWrite(GRNLEDS[5], HIGH);
-					// delay(250);
-					// digitalWrite(GRNLEDS[2], HIGH);
-					// digitalWrite(GRNLEDS[4], HIGH);
-					// delay(250);
-					// digitalWrite(GRNLEDS[3], HIGH);
-					// delay(250);
-					// break;
 
 				default:
 					break;
@@ -189,10 +174,8 @@ void loop() {
 			xbeeSerial.println(frameTX);
 		}
 	}
-	else {
-		getTemperature();
-	}
-	delay(200);
+	getTemperature();
+	delay(50);
 }// end loop
 
 void recMessage() {   // RECIEVE LOGIC  --> sets "nodeID" and "instruction"
