@@ -13,11 +13,12 @@ int main()
             nodes[i].setTemp( &xbee );
 
             /* IF THE NODE IS TRIGGERED AND HASN'T BEEN HANDLED YET */
-            if( nodes[i].emergency() && emergencies[i] == false )
+            if( nodes[i].emergency() || emergencies[i] )
                 emergency(i);
         }
 
         update_gui();
+        wait(0.5);
     }
 }
 
@@ -91,6 +92,7 @@ void emergency( int source )
                 nodes[i].command( &xbee, RIGHT );
         }
     }
+    pc.printf("Nodes updated...\r\n");
 }
 
 void basic_drill()
@@ -126,7 +128,7 @@ void process_command()
         basic_drill();
     else if( strcmp( pc_buff, "quit" ) == 0 )
         quit();
-    else if( strncmp( pc_buff, "nodes", 5 ) == 0 )
+    else if( strncmp( pc_buff, "node", strlen("node") ) == 0 )
     {
         // grab the target node from the end of the command and execute
         int target = atoi( &pc_buff[strlen(pc_buff) - 1] );
